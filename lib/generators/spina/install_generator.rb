@@ -1,7 +1,7 @@
 module Spina
   class InstallGenerator < Rails::Generators::Base
     source_root File.expand_path("../templates", __FILE__)
-    
+
     class_option :first_deploy, type: :boolean, default: false
     class_option :silent, type: :boolean, default: false
 
@@ -45,10 +45,11 @@ module Spina
       return if account.theme.present? && ( !talkative_install? || !no?("Theme '#{account.theme}' is set. Skip? [Yn]") )
 
       theme = account.theme || themes.first
+
       if talkative_install?
-        theme = begin
-                  theme = ask("What theme do you want to use? (#{themes.join('/')}) [#{theme}]").presence || theme
-                end until theme.in? themes
+        until theme.in?(themes)
+          theme = ask("What theme do you want to use? (#{themes.join("/")}) [#{theme}]")
+        end
       end
 
       account.update(theme: theme)
@@ -84,7 +85,7 @@ module Spina
     def bootstrap_spina
       rake 'spina:bootstrap'
     end
-    
+
     def build_tailwind
       rake 'spina:tailwind:build'
     end
@@ -110,7 +111,7 @@ module Spina
         themes = Spina::Theme.all.map(&:name)
         themes | ['default', 'demo']
       end
-      
+
       def first_deploy?
         options['first_deploy']
       end
